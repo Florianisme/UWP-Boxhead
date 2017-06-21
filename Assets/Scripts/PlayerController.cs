@@ -5,7 +5,7 @@ public class PlayerController : MonoBehaviour {
 
     public float speed = 8;
 	public GameObject pickupWeapon;
-	public Transform pickupSpawnLocation;
+	public GameObject bulletPath;
 
     private Rigidbody rig;
 
@@ -38,10 +38,26 @@ public class PlayerController : MonoBehaviour {
 			transform.rotation = Quaternion.Euler(0, 0, 0);
 		} 
 
+		if (Input.GetKey(KeyCode.Space)) {
+			fire();
+		}
+
         Vector3 movement = new Vector3(hAxis, 0, vAxis) * speed * Time.deltaTime;
 
         rig.MovePosition(transform.position + movement);
 	}
+
+
+			void fire () {
+		Instantiate (bulletPath, 
+			new Vector3(transform.position.x, transform.position.y, transform.position.z), 
+			transform.rotation);
+
+		RaycastHit hit;
+		if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.right), out hit))
+			print("Found an object - distance: " + hit.distance);
+			}
+
 
 	void onPickupActivated() {
 		Instantiate (pickupWeapon, 
