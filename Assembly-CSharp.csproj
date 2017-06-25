@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\Enemy.cs" />
+     <Compile Include="Assets\Scripts\FPSDisplay.cs" />
      <Compile Include="Assets\Scripts\PickupRotation.cs" />
      <Compile Include="Assets\Scripts\PickupTrigger.cs" />
      <Compile Include="Assets\Scripts\PlayerController.cs" />

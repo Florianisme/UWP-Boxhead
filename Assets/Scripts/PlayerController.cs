@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class PlayerController : MonoBehaviour
@@ -10,6 +11,11 @@ public class PlayerController : MonoBehaviour
 	public int rpm;
 	private float fireDelay;
 	private float nextFire;
+	private string weapon = "";
+
+	private Quaternion rotation;
+	private int health = 100;
+	public Slider healthSlider;
 
 	private Rigidbody rig;
 
@@ -18,6 +24,7 @@ public class PlayerController : MonoBehaviour
 	{
 		rig = GetComponent<Rigidbody> ();
 		fireDelay = 60.0f / rpm;
+		rotation = transform.rotation;
 	}
 	
 	// Update is called once per frame
@@ -28,40 +35,36 @@ public class PlayerController : MonoBehaviour
 
 		if (Input.GetKey (KeyCode.W)) {
 			vAxis = 1;
-			transform.rotation = Quaternion.Euler (0, -90, 0);
+			rotation = Quaternion.Euler (0, -90, 0);
 		}
 		if (Input.GetKey (KeyCode.S)) {
 			vAxis = -1;
-			transform.rotation = Quaternion.Euler (0, 90, 0);
+			rotation = Quaternion.Euler (0, 90, 0);
 		}
 		if (Input.GetKey (KeyCode.A)) {
 			hAxis = -1;
-			transform.rotation = Quaternion.Euler (0, 180, 0);
+			rotation = Quaternion.Euler (0, 180, 0);
 		}
 		if (Input.GetKey (KeyCode.D)) {
 			hAxis = 1;
-			transform.rotation = Quaternion.Euler (0, 0, 0);
+			rotation = Quaternion.Euler (0, 0, 0);
 		} 
 
-		if (Input.GetKey (KeyCode.Space) && Time.time >= nextFire) {
+		if (Input.GetKey (KeyCode.Space) && Time.time >= nextFire && weapon.Length > 0) {
 			fire ();
 			nextFire = Time.time + fireDelay;
 		}
 
-		Vector3 movement = new Vector3 (hAxis, 0, vAxis) * speed * Time.deltaTime;
-
-		rig.MovePosition (transform.position + movement);
+		rig.MoveRotation (rotation);
+		rig.MovePosition (transform.position + new Vector3 (hAxis, 0, vAxis) * speed * Time.deltaTime);
 	}
 
 
 	void fire ()
 	{
-
-
 		Destroy(Instantiate (bulletPath, 
-			new Vector3 (transform.position.x, transform.position.y, transform.position.z), 
-			transform.rotation), 0.5f);
-		
+			new Vector3 (rig.position.x, rig.position.y, rig.position.z), 
+			Quaternion.Euler (rig.rotation.x, rig.rotation.y + Random.Range(-2.0f, 2.0f), rig.rotation.z)), 0.5f);
 
 			RaycastHit hit;
 		if (Physics.Raycast (transform.position, transform.TransformDirection (Vector3.right), out hit)) {
@@ -74,8 +77,24 @@ public class PlayerController : MonoBehaviour
 
 	void onPickupActivated ()
 	{
+		weapon = "gun";
 		Instantiate (pickupWeapon, 
 			new Vector3 (transform.position.x + 0.113f, transform.position.y + 0.513f, transform.position.z - 0.335f), 
 			Quaternion.Euler (0, 180, 0), gameObject.transform);
 	}
+
+	public void dealDamage() {
+		Debug.Log ("Hit registered");
+		if (health - 5 <= 0)
+			killPlayer ();
+		else
+			health -= 5;
+		healthSlider.value = health;
+	}
+
+	void killPlayer() {
+		Destroy (gameObject);
+		healthSlider.value = 0;
+	}
+
 }
