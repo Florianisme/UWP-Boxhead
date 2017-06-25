@@ -6,10 +6,14 @@ public class Enemy : MonoBehaviour {
 
 	private Transform player; // We'll add closest player calculation when adding local multiplayer, just use one for now for every instance
 	public int speed;
+	public int turnSpeed;
 	private int health = 100;
+
+	private Rigidbody rig;
 
 	void Start () {
 		player = GameObject.Find("Character One").transform; //target the player
+		rig = GetComponent<Rigidbody> ();
 	}
 
 
@@ -19,8 +23,13 @@ public class Enemy : MonoBehaviour {
 		} 
 		else { // Move
 			transform.rotation = Quaternion.Slerp (transform.rotation,
-				Quaternion.LookRotation (player.position - transform.position), speed * Time.deltaTime);
-			transform.position += transform.forward * speed * Time.deltaTime;
+				Quaternion.LookRotation (player.position - transform.position), turnSpeed * Time.deltaTime);
+			//transform.position += transform.forward * speed * Time.deltaTime;
+
+
+			Vector3 movement = new Vector3 (1, 0, 1) * speed * Time.deltaTime;
+
+			rig.MovePosition (transform.position + movement);
 		}
 	}
 
