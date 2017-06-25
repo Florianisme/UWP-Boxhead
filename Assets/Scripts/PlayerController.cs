@@ -1,67 +1,81 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PlayerController : MonoBehaviour {
+public class PlayerController : MonoBehaviour
+{
 
-    public float speed = 8;
+	public float speed = 8;
 	public GameObject pickupWeapon;
 	public GameObject bulletPath;
+	public int rpm;
+	private float fireDelay;
+	private float nextFire;
 
-    private Rigidbody rig;
+	private Rigidbody rig;
 
 	// Use this for initialization
-	void Start () 
-    {
-        rig = GetComponent<Rigidbody>();
+	void Start ()
+	{
+		rig = GetComponent<Rigidbody> ();
+		fireDelay = 60.0f / rpm;
 	}
 	
 	// Update is called once per frame
-	void FixedUpdate () 
+	void FixedUpdate ()
 	{
 		float hAxis = 0;
 		float vAxis = 0;
 
-		if (Input.GetKey(KeyCode.W)) {
+		if (Input.GetKey (KeyCode.W)) {
 			vAxis = 1;
-			transform.rotation = Quaternion.Euler(0, -90, 0);
+			transform.rotation = Quaternion.Euler (0, -90, 0);
 		}
-		if (Input.GetKey(KeyCode.S)) {
+		if (Input.GetKey (KeyCode.S)) {
 			vAxis = -1;
-			transform.rotation = Quaternion.Euler(0, 90, 0);
+			transform.rotation = Quaternion.Euler (0, 90, 0);
 		}
-		if (Input.GetKey(KeyCode.A)) {
+		if (Input.GetKey (KeyCode.A)) {
 			hAxis = -1;
-			transform.rotation = Quaternion.Euler(0, 180, 0);
+			transform.rotation = Quaternion.Euler (0, 180, 0);
 		}
 		if (Input.GetKey (KeyCode.D)) {
 			hAxis = 1;
-			transform.rotation = Quaternion.Euler(0, 0, 0);
+			transform.rotation = Quaternion.Euler (0, 0, 0);
 		} 
 
-		if (Input.GetKey(KeyCode.Space)) {
-			fire();
+		if (Input.GetKey (KeyCode.Space) && Time.time >= nextFire) {
+			fire ();
+			nextFire = Time.time + fireDelay;
 		}
 
-        Vector3 movement = new Vector3(hAxis, 0, vAxis) * speed * Time.deltaTime;
+		Vector3 movement = new Vector3 (hAxis, 0, vAxis) * speed * Time.deltaTime;
 
-        rig.MovePosition(transform.position + movement);
+		rig.MovePosition (transform.position + movement);
 	}
 
 
-			void fire () {
-		Instantiate (bulletPath, 
-			new Vector3(transform.position.x, transform.position.y, transform.position.z), 
-			transform.rotation);
-
-		RaycastHit hit;
-		if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.right), out hit))
-			print("Found an object - distance: " + hit.distance);
-			}
+	void fire ()
+	{
 
 
-	void onPickupActivated() {
+		Destroy(Instantiate (bulletPath, 
+			new Vector3 (transform.position.x, transform.position.y, transform.position.z), 
+			transform.rotation), 0.5f);
+		
+
+			RaycastHit hit;
+		if (Physics.Raycast (transform.position, transform.TransformDirection (Vector3.right), out hit)) {
+			print ("Found an object - distance: " + hit.distance);
+			hit.collider.BroadcastMessage ("registerHit");
+		}
+			
+	}
+
+
+	void onPickupActivated ()
+	{
 		Instantiate (pickupWeapon, 
-			new Vector3(transform.position.x + 0.113f, transform.position.y + 0.513f, transform.position.z -0.335f), 
-			Quaternion.Euler(0, 180, 0), gameObject.transform);
+			new Vector3 (transform.position.x + 0.113f, transform.position.y + 0.513f, transform.position.z - 0.335f), 
+			Quaternion.Euler (0, 180, 0), gameObject.transform);
 	}
 }
